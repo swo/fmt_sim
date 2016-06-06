@@ -30,12 +30,19 @@ def parse_args(args=None):
     p.add_argument('--output', '-o', type=argparse.FileType('w'), default=sys.stdout, help='trial history')
     p.set_defaults(func=simulate.write_placebo)
 
+    p = sp.add_parser('block', help='assign donors to patients in blocks')
+    p.add_argument('donors', type=argparse.FileType('r'), help='donor list')
+    p.add_argument('n_patients', type=int)
+    p.add_argument('p_placebo', type=float, help='placebo response rate')
+    p.add_argument('p_eff', type=float, help='efficacious treatment response rate')
+    p.add_argument('--output', '-o', type=argparse.FileType('w'), default=sys.stdout, help='trial history')
+    p.set_defaults(func=simulate.write_block)
+
     p = sp.add_parser('random', help='randomly assign donors')
     p.add_argument('donors', type=argparse.FileType('r'), help='donor list')
     p.add_argument('n_patients', type=int)
     p.add_argument('p_placebo', type=float, help='placebo response rate')
     p.add_argument('p_eff', type=float, help='efficacious treatment response rate')
-    p.add_argument('ped', type=float, help='prevalence of efficacious donors')
     p.add_argument('--output', '-o', type=argparse.FileType('w'), default=sys.stdout, help='trial history')
     p.set_defaults(func=simulate.write_random)
 
@@ -44,7 +51,6 @@ def parse_args(args=None):
     p.add_argument('n_patients', type=int)
     p.add_argument('p_placebo', type=float, help='placebo response rate')
     p.add_argument('p_eff', type=float, help='efficacious treatment response rate')
-    p.add_argument('ped', type=float, help='prevalence of efficacious donors')
     p.add_argument('n_balls0', type=int, help='initial number of balls per donor')
     p.add_argument('n_balls_reward', type=int, help='number of balls to give to a donor after a success')
     p.add_argument('n_balls_penalty', type=int, help='number of balls to give to other donors after a failure')
