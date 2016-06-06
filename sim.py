@@ -28,7 +28,7 @@ def parse_args(args=None):
     p.add_argument('n_patients', type=int)
     p.add_argument('p_placebo', type=float, help='placebo response rate')
     p.add_argument('--output', '-o', type=argparse.FileType('w'), default=sys.stdout, help='trial history')
-    p.set_defaults(func=simulate.placebo)
+    p.set_defaults(func=simulate.write_placebo)
 
     p = sp.add_parser('random', help='randomly assign donors')
     p.add_argument('donors', type=argparse.FileType('r'), help='donor list')
@@ -37,7 +37,7 @@ def parse_args(args=None):
     p.add_argument('p_eff', type=float, help='efficacious treatment response rate')
     p.add_argument('ped', type=float, help='prevalence of efficacious donors')
     p.add_argument('--output', '-o', type=argparse.FileType('w'), default=sys.stdout, help='trial history')
-    p.set_defaults(func=simulate.random)
+    p.set_defaults(func=simulate.write_random)
 
     p = sp.add_parser('urn', help='assign donors with a Polya urn')
     p.add_argument('donors', type=argparse.FileType('r'), help='donor list')
@@ -50,12 +50,11 @@ def parse_args(args=None):
     p.add_argument('n_balls_penalty', type=int, help='number of balls to give to other donors after a failure')
     p.add_argument('--no_replace', action='store_true', help='do not replace drawn ball?')
     p.add_argument('--output', '-o', type=argparse.FileType('w'), default=sys.stdout, help='trial history')
-    p.set_defaults(func=simulate.urn)
+    p.set_defaults(func=simulate.write_urn)
 
     p = cmd_parsers.add_parser('power', help='power')
     p.add_argument('treatment_history', type=argparse.FileType('r'), help='trial history from treatment arm')
     p.add_argument('placebo_history', type=argparse.FileType('r'), help='trial history from placebo arm')
-    p.add_argument('n_bootstraps', type=int)
     p.add_argument('--output', '-o', type=argparse.FileType('w'), default=sys.stdout, help='power report')
     p.set_defaults(func=power.power)
 
