@@ -11,8 +11,6 @@ of characters. The first character is a donor ID: 'A' means donor 0, 'B' means 1
 The placebo trials have one donor marked with character 'P'.
 '''
 
-# todo: add some explanatory items: the beta, etc. values, # patients, etc.
-
 import numpy as np
 
 def show_outcome(outcome, donor_id):

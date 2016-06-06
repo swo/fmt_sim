@@ -11,9 +11,6 @@ of characters. The first character is a donor ID: 'A' means donor 0, 'B' means 1
 The placebo trials have one donor marked with character 'P'.
 '''
 
-# todo:
-# - cache the Fisher's exact test
-
 import numpy as np
 import scipy.stats
 
@@ -54,3 +51,26 @@ def fisher_exact_p(treatment_success, placebo_success, arm_size):
     table = [[treatment_success, treatment_fail, placebo_success, placebo_fail]]
     oddsratio, p_value = scipy.stats.fisher_exact(table, alternative='greater')
     return p_value
+
+def parse_history_line(line):
+    n_successes = line.count('s')
+    n_total = len(line.rstrip()) // 2
+    return n_successes, n_total
+
+def power(treatment_history, placebo_history, output):
+    total_trials = 0
+    significant_trials = 0
+    for tx_line, pl_line in zip(treatment_history, placebo_history):
+        n_tx_succ, n_tx_total = parse_history_line(tx_line)
+        n_pl_succ, n_pl_total = parse_history_line(pl_line)
+        assert n_tx_total == n_pl_total
+        p = fisher_exact_p(n_tx_succ, n_pl_succ, n_tx_total)
+
+        if p < 0.05:
+            significant_trials += 1
+
+        total_trials += 1
+
+    center = significant_trials / total_trials
+    lo, hi = clopper_pearson(significant_trials, total_trials, conf=0.95)
+    print("\t".join([str(x) for x in lo, center, hi]), file=output)
