@@ -5,7 +5,7 @@ tests for donors.py
 '''
 
 import pytest
-import numpy as np
+import numpy as np, io
 from fmt_sim import analyze
 
 class TestClopper:
@@ -61,3 +61,19 @@ class TestPower:
         lo, hi = analyze.clopper_pearson(50, 100, conf=0.95)
 
         assert (lo, center, hi) == analyze.power(tx_hist, pl_hist)
+
+
+class TestWritePower:
+    def test_correct(self):
+        tx_hist = ['As' * 10] * 50 + ['Af' * 10] * 50
+        pl_hist = ['PsPf' * 5] * 100
+
+        center = 0.5
+        lo, hi = analyze.clopper_pearson(50, 100, conf=0.95)
+
+        f = io.StringIO()
+        analyze.write_power(tx_hist, pl_hist, f)
+        f.seek(0)
+        lo2, center2, hi2 = [float(x) for x in f.read().rstrip().split("\t")]
+        for x, y in [[lo, lo2], [center, center2], [hi, hi2]]:
+            assert round(x, 3) == round(y, 3)

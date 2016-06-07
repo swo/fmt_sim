@@ -48,16 +48,22 @@ def fisher_exact_p(treatment_success, placebo_success, arm_size):
 
     treatment_fail = arm_size - treatment_success
     placebo_fail = arm_size - placebo_success
-    table = [[treatment_success, treatment_fail, placebo_success, placebo_fail]]
+    table = [[treatment_success, treatment_fail], [placebo_success, placebo_fail]]
     oddsratio, p_value = scipy.stats.fisher_exact(table, alternative='greater')
     return p_value
 
 def parse_history_line(line):
+    if not set(line.rstrip()[1::2]) <= {'s', 'f'}:
+        raise RuntimeError("history line '{}' does not have appropriate 's' and 'f' markers".format(line.rstrip()))
+
+    if not all([ord(c) >= 65 for c in line.rstrip()[::2]]):
+        raise RuntimeError("history line '{}' have inappropriate donor IDs".format(line.rstrip()))
+
     n_successes = line.count('s')
     n_total = len(line.rstrip()) // 2
     return n_successes, n_total
 
-def power(treatment_history, placebo_history, output):
+def power(treatment_history, placebo_history, conf=0.95):
     total_trials = 0
     significant_trials = 0
     for tx_line, pl_line in zip(treatment_history, placebo_history):
@@ -72,5 +78,9 @@ def power(treatment_history, placebo_history, output):
         total_trials += 1
 
     center = significant_trials / total_trials
-    lo, hi = clopper_pearson(significant_trials, total_trials, conf=0.95)
-    print("\t".join([str(x) for x in lo, center, hi]), file=output)
+    lo, hi = clopper_pearson(significant_trials, total_trials, conf=conf)
+    return (lo, center, hi)
+
+def write_power(treatment_history, placebo_history, output):
+    lo, center, hi = power(treatment_history, placebo_history)
+    print("\t".join([str(x) for x in [lo, center, hi]]), file=output)
