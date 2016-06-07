@@ -5,7 +5,7 @@ tests for donors.py
 '''
 
 import pytest
-import numpy as np
+import numpy as np, io
 from fmt_sim import simulate
 
 @pytest.fixture
@@ -69,6 +69,20 @@ class TestPlaceboHistory:
             assert line.count('P') == 10
 
 
+class TestPlaceboWrite:
+    def test_correct(self):
+        f = io.StringIO()
+        simulate.write_placebo(10, 5, 0.5, f)
+        f.seek(0)
+        lines = [l.rstrip() for l in f.readlines()]
+        assert len(lines) == 10
+
+        for line in lines:
+            assert len(line) == 10
+            assert set(line[::2]) == {'P'}
+            assert set(line[1::2]) <= {'s', 'f'}
+
+
 class TestBlockHistory:
     def test_correct(self):
         # donor A is totally efficacious; B and C are totally useless
@@ -76,6 +90,18 @@ class TestBlockHistory:
         history = list(simulate.block_history(donors, 8, 0.0, 1.0))
         assert len(history) == 1
         assert history[0] == "AsBfCfAsBfCfAsBf"
+
+
+class TestBlockWrite:
+    def test_correct(self):
+        f = io.StringIO()
+        simulate.write_block(["010"] * 10, 5, 1.0, 0.0, f)
+        f.seek(0)
+        lines = [l.rstrip() for l in f.readlines()]
+        assert len(lines) == 10
+
+        for line in lines:
+            assert line == "AsBfCsAsBf"
 
 
 class TestRandomHistory:
