@@ -5,6 +5,7 @@ tests for donors.py
 '''
 
 import pytest
+import io
 from fmt_sim import donors
 
 class TestGenerate:
@@ -38,3 +39,16 @@ class TestParse:
         lst = ["555\n"]
         with pytest.raises(RuntimeError):
             list(donors.parse(lst))
+
+
+class TestWrite:
+    def test_correct(self):
+        f = io.StringIO()
+        donors.write(5, 10, 0.5, f)
+        f.seek(0)
+        lines = [l.rstrip() for l in f.readlines()]
+        assert len(lines) == 10
+
+        for line in lines:
+            assert len(line) == 5
+            assert set(line) <= {'0', '1'}
