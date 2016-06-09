@@ -91,7 +91,7 @@ def block_history(donors, n_patients, p_placebo, p_eff):
         yield history
 
 def write_random(donors, n_patients, p_placebo, p_eff, output):
-    for line in random_history(donors, n_patients, p_placebo, p_eff, output):
+    for line in random_history(donors, n_patients, p_placebo, p_eff):
         output.write(line + "\n")
 
 def random_history(donors, n_patients, p_placebo, p_eff):

@@ -107,6 +107,20 @@ class TestBlockWrite:
             assert line == "AsBfCsAsBf"
 
 
+class TestRandomWrite:
+    def test_correct(self):
+        f = io.StringIO()
+        simulate.write_random(["010"] * 10, 5, 1.0, 0.0, f)
+        f.seek(0)
+        lines = [l.rstrip() for l in f.readlines()]
+        assert len(lines) == 10
+
+        for line in lines:
+            assert len(line) == 10
+            assert set(line[::2]) <= {'A', 'B', 'C'}
+            assert set(line[1::2]) <= {'s', 'f'}
+
+
 class TestRandomHistory:
     def test_correct(self):
         donors = ["".join(np.random.choice(['0', '1'], size=3)) for i in range(20)]
