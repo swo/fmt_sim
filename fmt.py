@@ -62,7 +62,7 @@ def parse_args(args=None):
     p.add_argument('treatment_history', type=argparse.FileType('r'), help='trial history from treatment arm')
     p.add_argument('placebo_history', type=argparse.FileType('r'), help='trial history from placebo arm')
     p.add_argument('--output', '-o', type=argparse.FileType('w'), default=sys.stdout, help='power report')
-    p.set_defaults(func=analyze.power)
+    p.set_defaults(func=analyze.write_power)
 
     args = parser.parse_args(args)
     opts = vars(args)
