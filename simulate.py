@@ -30,7 +30,7 @@ class Urn:
 
     def choose(self):
         if sum(self.counts) == 0:
-            return np.randint(self.n_donors)
+            return np.random.randint(self.n_donors)
 
         total_balls = sum(self.counts)
         weights = [c / total_balls for c in self.counts]

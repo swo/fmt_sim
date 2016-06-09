@@ -19,6 +19,9 @@ class TestUrn:
     def test_choose(self, urn):
         assert urn.choose() in [0, 1, 2, 3]
 
+    def test_empty_choose(self):
+        assert simulate.Urn(3, 0, 0, 0).choose() in [0, 1, 2]
+
     def test_choose_deterministic(self):
         urn = simulate.Urn(4, 0, 3, 2)
         urn.update(1, 2)
