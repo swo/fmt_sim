@@ -8,6 +8,7 @@ one character per donor. "0" means "inefficacious donor"; "1" means "efficacious
 '''
 
 import numpy as np
+import warnings
 
 def generate(donors_per_trial, n_trials, ped):
     for donors in np.random.binomial(1, ped, size=(n_trials, donors_per_trial)):
@@ -21,6 +22,9 @@ def parse(donors):
         for x in values:
             if x not in [0, 1]:
                 raise RuntimeError("malformed donor quality line: {}".format(line.rstrip()))
+
+        if len(values) > 60:
+            warnings.warn("you are using {} donors; IDs for donors after 60 are unprintable".format(len(values)), UserWarning)
 
         yield values
 

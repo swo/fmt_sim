@@ -5,7 +5,7 @@ tests for donors.py
 '''
 
 import pytest
-import io
+import io, warnings
 from fmt_sim import donors
 
 class TestGenerate:
@@ -38,6 +38,20 @@ class TestParse:
     def test_fail_run(self):
         lst = ["555\n"]
         with pytest.raises(RuntimeError):
+            list(donors.parse(lst))
+
+    def test_no_warn(self):
+        # 60 donors should be OK
+        lst = ["0" * 60]
+        with pytest.warns(None) as record:
+            list(donors.parse(lst))
+
+        assert len(record) == 0
+
+    def test_warn(self):
+        # but 61 should cause a problem
+        lst = ["0" * 61]
+        with pytest.warns(UserWarning):
             list(donors.parse(lst))
 
 
