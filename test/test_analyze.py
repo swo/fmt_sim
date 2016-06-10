@@ -62,6 +62,9 @@ class TestPower:
 
         assert (lo, center, hi) == analyze.power(tx_hist, pl_hist)
 
+    def test_raise(self):
+        with pytest.raises(RuntimeError):
+            analyze.power([], [])
 
 class TestWritePower:
     def test_correct(self):

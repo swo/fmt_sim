@@ -77,6 +77,9 @@ def power(treatment_history, placebo_history, conf=0.95):
 
         total_trials += 1
 
+    if total_trials == 0:
+        raise RuntimeError("can't compute power on empty file")
+
     center = significant_trials / total_trials
     lo, hi = clopper_pearson(significant_trials, total_trials, conf=conf)
     return (lo, center, hi)
