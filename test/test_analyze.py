@@ -42,6 +42,10 @@ class TestParseHistory:
     def test_correct(self):
         assert analyze.parse_history_line('AsBfCs') == (2, 3)
 
+    def test_correct_with_confusing_donor(self):
+        # 's' can be a donor ID, watch out!
+        assert analyze.parse_history_line('sfsfsf') == (0, 3)
+
     def test_wrong_response_indicators(self):
         with pytest.raises(RuntimeError):
             analyze.parse_history_line('AsBsCx')

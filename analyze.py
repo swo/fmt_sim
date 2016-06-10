@@ -59,7 +59,7 @@ def parse_history_line(line):
     if not all([ord(c) >= 65 for c in line.rstrip()[::2]]):
         raise RuntimeError("history line '{}' have inappropriate donor IDs".format(line.rstrip()))
 
-    n_successes = line.count('s')
+    n_successes = line.rstrip()[1::2].count('s')
     n_total = len(line.rstrip()) // 2
     return n_successes, n_total
 
