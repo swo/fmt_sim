@@ -7,4 +7,4 @@ verbose:
 	py.test -v
 
 c:
-	gcc -O3 -shared -o testlib.o -fPIC testlib.c
+	gcc -O3 -shared -o bayesian_lib.o -fPIC bayesian_lib.c

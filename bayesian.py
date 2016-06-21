@@ -5,15 +5,18 @@ Generate myopic Bayesian histories.
 '''
 
 import numpy as np
-import functools, operator
+import functools, operator, os.path, ctypes
 import scipy.integrate
-from fmt_sim import donors as donors_mod
-from fmt_sim import simulate
+import donors as donors_mod, simulate
 
-import ctypes
-lib = ctypes.CDLL('/Users/scott/lib/fmt_sim/testlib.o')
-lib.f.restype = ctypes.c_double
-lib.f.argtypes = (ctypes.c_int, ctypes.c_double)
+library_fn = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'bayesian_lib.o')
+if os.path.exists(library_fn):
+    lib = ctypes.CDLL(library_fn)
+    lib.f.restype = ctypes.c_double
+    lib.f.argtypes = (ctypes.c_int, ctypes.c_double)
+    q_function = 'c'
+else:
+    q_function = 'python'
 
 class memoized(object):
     def __init__(self, func):
@@ -33,7 +36,7 @@ class memoized(object):
             return value
 
 @memoized
-def state_q(state):
+def state_q_c(state):
     n_donors = len(state) // 2
     args = [n_donors] + state
 
@@ -43,17 +46,23 @@ def state_q(state):
 def product(xs):
     return functools.reduce(operator.mul, xs)
 
-def state_q_old(state):
+@memoized
+def state_q_python(state):
     '''returns (value, error)'''
     def integrand(gam, bet, phi):
         eps = gam + bet - gam * bet
-        return product([phi * (eps ** si) * ((1.0 - eps) ** fi) + (1.0 - phi) * (bet ** si) * ((1.0 - bet) ** fi) for si, fi in state])
+        return product([phi * (eps ** si) * ((1.0 - eps) ** fi) + (1.0 - phi) * (bet ** si) * ((1.0 - bet) ** fi) for si, fi in zip(*[iter(state)] * 2)])
 
     result = scipy.integrate.nquad(integrand, [(0.0, 1.0), (0.0, 1.0), (0.0, 1.0)])
     return result
 
 def probabilities(state):
     '''posterior probability of donor success'''
+
+    if q_function == 'c':
+        state_q = state_q_c
+    elif q_function == 'python':
+        state_q = state_q_python
 
     q0 = state_q(state)[0]
     qs = []
