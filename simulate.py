@@ -97,14 +97,20 @@ def block_history(donors, n_patients, p_placebo, p_eff, n_donors=None):
 
         yield history
 
-def write_random(donors, n_patients, p_placebo, p_eff, output):
-    for line in random_history(donors, n_patients, p_placebo, p_eff):
+def write_random(donors, n_patients, p_placebo, p_eff, output, n_donors=None):
+    for line in random_history(donors, n_patients, p_placebo, p_eff, n_donors):
         output.write(line + "\n")
 
-def random_history(donors, n_patients, p_placebo, p_eff):
+def random_history(donors, n_patients, p_placebo, p_eff, n_donors=None):
     quality2p = {0: p_placebo, 1: p_eff}
 
     for qualities in donors_mod.parse(donors):
+        if n_donors is not None:
+            if n_donors > len(qualities):
+                raise RuntimeError("n_donors specified as {}, but only {} donors available".format(n_donors, len(qualities)))
+            else:
+                qualities = qualities[0: n_donors]
+
         donor_is = np.random.randint(len(qualities), size=n_patients)
         outcomes = [show_outcome(np.random.binomial(1, quality2p[qualities[donor_i]]), donor_i) for donor_i in donor_is]
         yield "".join(outcomes)

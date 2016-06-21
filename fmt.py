@@ -44,6 +44,7 @@ def parse_args(args=None):
     p.add_argument('n_patients', type=int)
     p.add_argument('p_placebo', type=float, help='placebo response rate')
     p.add_argument('p_eff', type=float, help='efficacious treatment response rate')
+    p.add_argument('--n_donors', type=int, default=None, help='specify a limited number of donors? [default: use all donors]')
     p.add_argument('--output', '-o', type=argparse.FileType('w'), default=sys.stdout, help='trial history')
     p.set_defaults(func=simulate.write_random)
 

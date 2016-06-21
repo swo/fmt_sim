@@ -5,7 +5,7 @@ tests for donors.py
 '''
 
 import pytest
-import numpy as np, io
+import numpy as np, io, re
 from fmt_sim import simulate
 
 @pytest.fixture
@@ -142,6 +142,13 @@ class TestRandomHistory:
             assert set(h[::2]) <= {'A', 'B', 'C'}
             assert set(h[1::2]) <= {'s', 'f'}
 
+    def test_limited(self):
+        # donor A is totally efficacious; B and C are totally useless
+        donors = ["100"]
+        history = list(simulate.block_history(donors, 8, 0.0, 1.0, n_donors=2))
+        assert len(history) == 1
+        assert set(re.findall('..', history[0])) <= {'As', 'Bf'}
+
 
 class TestUrnHistory:
     def test_correct(self):
@@ -153,7 +160,7 @@ class TestUrnHistory:
             assert set(h[1::2]) <= {'s', 'f'}
 
 
-class TestBayesianHistory:
+class TestBayesianWrite:
     def test_correct(self):
         f = io.StringIO()
         simulate.write_bayesian(["010"] * 2, 5, 1.0, 0.0, f)
@@ -165,3 +172,12 @@ class TestBayesianHistory:
             assert len(line) == 10
             assert set(line[::2]) <= {'A', 'B', 'C'}
             assert set(line[1::2]) <= {'s', 'f'}
+
+
+class TestBayesianHistory:
+    def test_correct(self):
+        donors = ["100", "010"]
+        history = list(simulate.bayesian_history(donors, 5, 0.0, 1.0))
+        assert len(history) == 2
+        for line in history:
+            assert len(line) == 10

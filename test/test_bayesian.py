@@ -52,12 +52,3 @@ class TestChoice:
     def test_correct(self):
         history = [1, 2, 3, 4, 5, 0]
         assert bayesian.choice(history) == 2
-
-
-class TestHistory:
-    def test_correct(self):
-        donors = ["100", "010"]
-        history = list(bayesian.history(donors, 5, 0.0, 1.0))
-        assert len(history) == 2
-        for line in history:
-            assert len(line) == 10
