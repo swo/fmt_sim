@@ -7,16 +7,7 @@ Generate myopic Bayesian histories.
 import numpy as np
 import functools, operator, os.path, ctypes
 import scipy.integrate
-import donors as donors_mod, simulate
-
-library_fn = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'bayesian_lib.o')
-if os.path.exists(library_fn):
-    lib = ctypes.CDLL(library_fn)
-    lib.f.restype = ctypes.c_double
-    lib.f.argtypes = (ctypes.c_int, ctypes.c_double)
-    q_function = 'c'
-else:
-    q_function = 'python'
+from fmt_sim import donors as donors_mod, simulate
 
 class memoized(object):
     def __init__(self, func):
@@ -56,13 +47,17 @@ def state_q_python(state):
     result = scipy.integrate.nquad(integrand, [(0.0, 1.0), (0.0, 1.0), (0.0, 1.0)])
     return result
 
+library_fn = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'bayesian_lib.o')
+if os.path.exists(library_fn):
+    lib = ctypes.CDLL(library_fn)
+    lib.f.restype = ctypes.c_double
+    lib.f.argtypes = (ctypes.c_int, ctypes.c_double)
+    state_q = state_q_c
+else:
+    state_q = state_q_python
+
 def probabilities(state):
     '''posterior probability of donor success'''
-
-    if q_function == 'c':
-        state_q = state_q_c
-    elif q_function == 'python':
-        state_q = state_q_python
 
     q0 = state_q(state)[0]
     qs = []
