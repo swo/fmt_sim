@@ -10,23 +10,29 @@ import scipy.integrate
 from fmt_sim import donors as donors_mod
 from fmt_sim import simulate
 
+import ctypes
+lib = ctypes.CDLL('/Users/scott/lib/fmt_sim/testlib.o')
+lib.f.restype = ctypes.c_double
+lib.f.argtypes = (ctypes.c_int, ctypes.c_double)
+
+def state_q_new(state):
+    n_donors = len(state)
+    raw_state = sum([[x, y] for x, y in state], [])
+    args = [n_donors] + raw_state
+
+    result = scipy.integrate.nquad(lib.f, [[0, 1]] * 3, args=args)
+    return result
+
 def product(xs):
     return functools.reduce(operator.mul, xs)
 
-def state_q(state):
+def state_q_old(state):
     '''returns (value, error)'''
     def integrand(gam, bet, phi):
         eps = gam + bet - gam * bet
         return product([phi * (eps ** si) * ((1.0 - eps) ** fi) + (1.0 - phi) * (bet ** si) * ((1.0 - bet) ** fi) for si, fi in state])
 
-    lower1 = 0.0
-    upper1 = 1.0
-    lower2 = lambda x: 0.0
-    upper2 = lambda x: 1.0
-    lower3 = lambda x, y: 0.0
-    upper3 = lambda x, y: 1.0
-
-    result = scipy.integrate.tplquad(integrand, lower1, upper1, lower2, upper2, lower3, upper3)
+    result = scipy.integrate.nquad(integrand, [(0.0, 1.0), (0.0, 1.0), (0.0, 1.0)])
     return result
 
 def with_success(state, i):
@@ -51,7 +57,8 @@ def history(donors, n_patients, p_placebo, p_eff):
     for qualities in donors_mod.parse(donors):
         history = ""
 
-        state = [(0, 0)] * n_patients
+        n_donors = len(qualities)
+        state = [(0, 0)] * n_donors
         for patient_i in range(n_patients):
             donor_i = choice(state)
             response = np.random.binomial(1, quality2p[qualities[donor_i]])
