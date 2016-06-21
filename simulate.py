@@ -133,5 +133,23 @@ def urn_history(donors, n_patients, p_placebo, p_eff, n_balls0, n_balls_reward, 
         yield history
 
 def write_bayesian(donors, n_patients, p_placebo, p_eff, output):
-    for line in bayesian.history(donors, n_patients, p_placebo, p_eff):
+    for line in bayesian_history(donors, n_patients, p_placebo, p_eff):
         output.write(line + "\n")
+
+def bayesian_history(donors, n_patients, p_placebo, p_eff):
+    quality2p = {0: p_placebo, 1: p_eff}
+
+    for qualities in donors_mod.parse(donors):
+        history = ""
+
+        n_donors = len(qualities)
+        state = [0] * (2 * n_donors)
+        for patient_i in range(n_patients):
+            donor_i = bayesian.choice(state)
+            response = np.random.binomial(1, quality2p[qualities[donor_i]])
+
+            state[donor_i * 2 + (1 - response)] += 1
+
+            history += show_outcome(response, donor_i)
+
+        yield history

@@ -7,7 +7,7 @@ Generate myopic Bayesian histories.
 import numpy as np
 import functools, operator, os.path, ctypes
 import scipy.integrate
-from fmt_sim import donors as donors_mod, simulate
+from fmt_sim import donors as donors_mod
 
 class memoized(object):
     def __init__(self, func):
@@ -71,21 +71,3 @@ def probabilities(state):
 
 def choice(state):
     return np.argmax(probabilities(state))
-
-def history(donors, n_patients, p_placebo, p_eff):
-    quality2p = {0: p_placebo, 1: p_eff}
-
-    for qualities in donors_mod.parse(donors):
-        history = ""
-
-        n_donors = len(qualities)
-        state = [0] * (2 * n_donors)
-        for patient_i in range(n_patients):
-            donor_i = choice(state)
-            response = np.random.binomial(1, quality2p[qualities[donor_i]])
-
-            state[donor_i * 2 + (1 - response)] += 1
-
-            history += simulate.show_outcome(response, donor_i)
-
-        yield history
