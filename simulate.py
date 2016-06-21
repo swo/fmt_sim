@@ -73,16 +73,22 @@ def placebo_history(n_trials, n_patients, p_placebo):
         # 15 means 'P'
         yield "".join([show_outcome(o, 15) for o in outcomes])
 
-def write_block(donors, n_patients, p_placebo, p_eff, output):
-    for line in block_history(donors, n_patients, p_placebo, p_eff):
+def write_block(donors, n_patients, p_placebo, p_eff, output, n_donors=None):
+    for line in block_history(donors, n_patients, p_placebo, p_eff, n_donors):
         output.write(line + "\n")
 
-def block_history(donors, n_patients, p_placebo, p_eff):
+def block_history(donors, n_patients, p_placebo, p_eff, n_donors=None):
     # create a dict that points from patient ID to donor ID
     # compute the dict by counting the patients while cycling through donors
     quality2p = {0: p_placebo, 1: p_eff}
 
     for qualities in donors_mod.parse(donors):
+        if n_donors is not None:
+            if n_donors > len(qualities):
+                raise RuntimeError("n_donors specified as {}, but only {} donors available".format(n_donors, len(qualities)))
+            else:
+                qualities = qualities[0: n_donors]
+
         history = ""
         for patient_i, donor_i in zip(range(n_patients), itertools.cycle(range(len(qualities)))):
             response = np.random.binomial(1, quality2p[qualities[donor_i]])

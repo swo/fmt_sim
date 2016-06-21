@@ -94,6 +94,18 @@ class TestBlockHistory:
         assert len(history) == 1
         assert history[0] == "AsBfCfAsBfCfAsBf"
 
+    def test_limited(self):
+        # donor A is totally efficacious; B and C are totally useless
+        donors = ["100"]
+        history = list(simulate.block_history(donors, 8, 0.0, 1.0, n_donors=2))
+        assert len(history) == 1
+        assert history[0] == "AsBfAsBfAsBfAsBf"
+
+    def test_limited_error(self):
+        donors = ["100"]
+        with pytest.raises(RuntimeError):
+            list(simulate.block_history(donors, 8, 0.0, 1.0, n_donors=10))
+
 
 class TestBlockWrite:
     def test_correct(self):
