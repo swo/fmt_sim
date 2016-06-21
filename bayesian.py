@@ -15,10 +15,27 @@ lib = ctypes.CDLL('/Users/scott/lib/fmt_sim/testlib.o')
 lib.f.restype = ctypes.c_double
 lib.f.argtypes = (ctypes.c_int, ctypes.c_double)
 
-def state_q_new(state):
-    n_donors = len(state)
-    raw_state = sum([[x, y] for x, y in state], [])
-    args = [n_donors] + raw_state
+class memoized(object):
+    def __init__(self, func):
+        self.func = func
+        self.cache = {}
+
+    def __call__(self, lst):
+        args = tuple(lst)
+        if args in self.cache:
+            return self.cache[args]
+        else:
+            value = self.func(lst)
+
+            if sum(args) < 10:
+                self.cache[args] = value
+
+            return value
+
+@memoized
+def state_q(state):
+    n_donors = len(state) // 2
+    args = [n_donors] + state
 
     result = scipy.integrate.nquad(lib.f, [[0, 1]] * 3, args=args)
     return result
@@ -35,17 +52,17 @@ def state_q_old(state):
     result = scipy.integrate.nquad(integrand, [(0.0, 1.0), (0.0, 1.0), (0.0, 1.0)])
     return result
 
-def with_success(state, i):
-    return [(x[0] + 1, x[1]) if j == i else x for j, x in enumerate(state)]
-
-def with_failure(state, i):
-    return [(x[0], x[1] + 1) if j == i else x for j, x in enumerate(state)]
-
 def probabilities(state):
     '''posterior probability of donor success'''
 
     q0 = state_q(state)[0]
-    qs = [state_q(with_success(state, i))[0] for i in range(len(state))]
+    qs = []
+
+    for i in range(len(state) // 2):
+        new_state = list(state)
+        new_state[i * 2] += 1
+        qs.append(state_q(new_state)[0])
+
     return [q / q0 for q in qs]
 
 def choice(state):
@@ -58,15 +75,12 @@ def history(donors, n_patients, p_placebo, p_eff):
         history = ""
 
         n_donors = len(qualities)
-        state = [(0, 0)] * n_donors
+        state = [0] * (2 * n_donors)
         for patient_i in range(n_patients):
             donor_i = choice(state)
             response = np.random.binomial(1, quality2p[qualities[donor_i]])
 
-            if response == 1:
-                state = with_success(state, donor_i)
-            elif response == 0:
-                state = with_failure(state, donor_i)
+            state[donor_i * 2 + (1 - response)] += 1
 
             history += simulate.show_outcome(response, donor_i)
 
