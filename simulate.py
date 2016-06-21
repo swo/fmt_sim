@@ -13,6 +13,7 @@ The placebo trials have one donor marked with character 'P'.
 
 import numpy as np, itertools
 from fmt_sim import donors as donors_mod
+from fmt_sim import bayesian
 
 class Urn:
     '''Polya urn'''
@@ -130,3 +131,7 @@ def urn_history(donors, n_patients, p_placebo, p_eff, n_balls0, n_balls_reward, 
             history += show_outcome(response, donor_i)
 
         yield history
+
+def write_bayesian(donors, n_patients, p_placebo, p_eff, output):
+    for line in bayesian.history(donors, n_patients, p_placebo, p_eff):
+        output.write(line + "\n")

@@ -59,6 +59,14 @@ def parse_args(args=None):
     p.add_argument('--output', '-o', type=argparse.FileType('w'), default=sys.stdout, help='trial history')
     p.set_defaults(func=simulate.write_urn)
 
+    p = sp.add_parser('bayesian', help='assign donors with myopic Bayesian algorithm (flat prior)')
+    p.add_argument('donors', type=argparse.FileType('r'), help='donor list')
+    p.add_argument('n_patients', type=int)
+    p.add_argument('p_placebo', type=float, help='placebo response rate')
+    p.add_argument('p_eff', type=float, help='efficacious treatment response rate')
+    p.add_argument('--output', '-o', type=argparse.FileType('w'), default=sys.stdout, help='trial history')
+    p.set_defaults(func=simulate.write_bayesian)
+
     p = cmd_parsers.add_parser('power', help='power')
     p.add_argument('treatment_history', type=argparse.FileType('r'), help='trial history from treatment arm')
     p.add_argument('placebo_history', type=argparse.FileType('r'), help='trial history from placebo arm')

@@ -151,3 +151,17 @@ class TestUrnHistory:
         for h in history:
             assert set(h[::2]) <= {'A', 'B', 'C'}
             assert set(h[1::2]) <= {'s', 'f'}
+
+
+class TestBayesianHistory:
+    def test_correct(self):
+        f = io.StringIO()
+        simulate.write_bayesian(["010"] * 2, 5, 1.0, 0.0, f)
+        f.seek(0)
+        lines = [l.rstrip() for l in f.readlines()]
+        assert len(lines) == 2
+
+        for line in lines:
+            assert len(line) == 10
+            assert set(line[::2]) <= {'A', 'B', 'C'}
+            assert set(line[1::2]) <= {'s', 'f'}
