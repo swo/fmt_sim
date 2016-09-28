@@ -138,7 +138,7 @@ def urn_history(donors, n_patients, p_placebo, p_eff, n_balls0, n_balls_reward, 
 
         yield history
 
-def write_bayesian(donors, n_patients, p_placebo, p_eff, output):
+def write_bayesian(donors, n_patients, p_placebo, p_eff, output, n_donors=None):
     for line in bayesian_history(donors, n_patients, p_placebo, p_eff):
         output.write(line + "\n")
 
